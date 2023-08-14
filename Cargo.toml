@@ -1,0 +1,21 @@
+[package]
+name = "imohash"
+version = "0.1.0"
+edition = "2021"
+authors = ["hiql <qiu_lin@163.com>"]
+readme = "README.md"
+license = "MIT"
+description = "Fast hashing for large files"
+documentation = "https://docs.rs/imohash"
+repository = "https://github.com/hiql/imohash"
+categories = ["algorithms", "filesystem", "encoding"]
+keywords = ["checksum", "digest", "hash", "murmur3", "encoding"]
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+murmur3 = "0.5.2"
+
+[dev-dependencies]
+md-5 = "0.10.5"
+hex = "0.4.3"
