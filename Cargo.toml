@@ -1,6 +1,6 @@
 [package]
 name = "imohash"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 authors = ["hiql <qiu_lin@163.com>"]
 readme = "README.md"
@@ -14,7 +14,7 @@ keywords = ["checksum", "digest", "hash", "murmur3", "encoding"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-murmur3 = "0.5.2"
+murmur3 = "0.5"
 
 [dev-dependencies]
 md-5 = "0.10.5"
