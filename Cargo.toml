@@ -1,6 +1,6 @@
 [package]
 name = "imohash"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2021"
 authors = ["hiql <qiu_lin@163.com>"]
 readme = "README.md"

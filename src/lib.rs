@@ -60,7 +60,7 @@ impl Hasher {
         reader.rewind()?;
         if self.sample_size < 1
             || size < self.sample_threshold as u64
-            || size < (2 * self.sample_size - 1) as u64
+            || size < (4 * self.sample_size) as u64
         {
             reader.read_to_end(&mut buffer)?;
         } else {
@@ -264,10 +264,10 @@ mod tests {
             (16384, 131073, 131072, "808008282d3f3b53e1fd132cc51fcc1d"),
             (16384, 131072, 500000, "a0c21e44a0ba3bddee802a9d1c5332ca"),
             (50, 131072, 300000, "e0a712edd8815c606344aed13c44adcf"),
-            (0, 100, 1000, "e80753211a57ee0de67c756e98e00496"),
-            (50, 9999, 1000, "e80753211a57ee0de67c756e98e00496"),
-            (501, 20, 1000, "e80753211a57ee0de67c756e98e00496"),
-            (501, 20, 1001, "e9079899cffb46f60c8645a01f12f9c9"),
+            (0, 100, 999, "e7078bfc9bdf7d7706adbd21002bb752"),
+            (50, 9999, 999, "e7078bfc9bdf7d7706adbd21002bb752"),
+            (250, 20, 999, "e7078bfc9bdf7d7706adbd21002bb752"),
+            (250, 20, 1000, "e807ae87d3dafb5eb6518a5a256297e9"),
         ];
 
         for test in tests {
