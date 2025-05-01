@@ -12,9 +12,20 @@ categories = ["algorithms", "filesystem", "encoding"]
 keywords = ["checksum", "digest", "hash", "murmur3", "encoding"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[lib]
+name = "imohash"
+path = "src/lib.rs"
+
+[[bin]]
+name = "imohash"
+path = "src/main.rs"
 
 [dependencies]
+# Common dependencies
 murmur3 = "0.5"
+# Dependencies only for binary
+clap = { version = "4.5.35", features = ["std"] }
+hex = "0.4.3"
 
 [dev-dependencies]
 md-5 = "0.10.5"

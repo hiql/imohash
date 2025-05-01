@@ -1,0 +1,2 @@
+matplotlib >= 3.10.1
+jupyter >= 1.0.0

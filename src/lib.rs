@@ -1,6 +1,110 @@
 //! Fast hashing for large files.
 //!
 //! It is based atop murmurhash3 and uses file size and sample data to construct the hash.
+//!
+//! # Examples
+//!
+//! Basic synchronous usage:
+//!
+//! ```rust
+//! use imohash::Hasher;
+//!
+//! // Creates a new hasher using default sample parameters
+//! let hasher = Hasher::new();
+//! //or creates with custom sample parameters
+//! let hasher = Hasher::with_sample_size_and_threshold(3, 45);
+//!
+//! // Hashes a byte slice
+//! let hash_value = hasher.sum("hello".as_bytes()).unwrap();
+//!
+//! // Hashes a file
+//! let hash_value = hasher.sum_file("samples/system.evtx").unwrap();
+//! ```
+//!
+//! Advanced asynchronous usage:
+//!
+//! ```rust
+//! use std::sync::Arc;
+//! use std::thread;
+//! use std::thread::JoinHandle;
+//! use std::path::{Path, PathBuf};
+//!
+//! pub fn sum_files<P: AsRef<Path>>(
+//!     file_paths: Vec<P>,
+//!     sample_size: Option<u32>,
+//!     sample_threshold: Option<u32>,
+//!     threads_count: Option<u8>,
+//! ) -> std::sync::mpsc::Receiver<(u128, PathBuf)> {
+//!     let sample_size = sample_size.unwrap_or(imohash::SAMPLE_SIZE);
+//!     let sample_threshold = sample_threshold.unwrap_or(imohash::SAMPLE_THRESHOLD);
+//!     let threads_count = threads_count.unwrap_or_else(|| {
+//!         (thread::available_parallelism().unwrap().get() * 2) as u8 // two threads per core
+//!     }) as usize;
+//!     assert!(threads_count > 0);
+//!
+//!     let hasher = Arc::new(imohash::Hasher::with_sample_size_and_threshold(
+//!         sample_size,
+//!         sample_threshold,
+//!     ));
+//!
+//!     let (sender, receiver): (
+//!         std::sync::mpsc::Sender<(u128, PathBuf)>,
+//!         std::sync::mpsc::Receiver<(u128, PathBuf)>,
+//!     ) = std::sync::mpsc::channel();
+//!     let sender = Arc::new(sender);
+//!
+//!     let mut threads: Vec<JoinHandle<()>> = Vec::with_capacity(threads_count);
+//!     let chunk_size = (file_paths.len() + threads_count - 1) / threads_count;
+//!
+//!     for file_paths_chunk in file_paths.chunks(chunk_size) {
+//!         let shared_hasher = Arc::clone(&hasher);
+//!         let shared_sender = Arc::clone(&sender);
+//!         let file_path_list: Vec<PathBuf> = file_paths_chunk
+//!             .into_iter()
+//!             .map(|path| path.as_ref().to_path_buf())
+//!             .collect();
+//!
+//!         let handle = thread::spawn(move || {
+//!             for file_path in file_path_list {
+//!                 let hash = shared_hasher.sum_file(&file_path);
+//!                 match hash {
+//!                     Err(_) => continue, // Path is directory
+//!                     Ok(hash) => shared_sender.send((hash, file_path)).unwrap(),
+//!                 }
+//!             }
+//!         });
+//!
+//!         threads.push(handle);
+//!     }
+//!
+//!     receiver
+//! }
+//!
+//! fn main() {
+//!   let receiver: std::sync::mpsc::Receiver<(u128, PathBuf)> = sum_files(
+//!       vec![
+//!           PathBuf::from("/bin/cp"),
+//!           PathBuf::from("/bin/mv"),
+//!           PathBuf::from("/bin/rm"),
+//!       ],  // file_paths
+//!       None,  // sample_size
+//!       None,  // sample_threshold
+//!       None  // threads_count
+//!   );
+//!
+//!   loop {
+//!       let hash_result: Result<(u128, PathBuf), std::sync::mpsc::RecvError> = receiver.recv();
+//!       match hash_result {
+//!           // Since sender is not dropping explicitly, RecvError will occur, when no any Sender
+//!           Err(std::sync::mpsc::RecvError) => break,
+//!           Ok(hash_result) => {
+//!               let (hash, file_path) = hash_result;
+//!               println!("{}  {}", hash, file_path.as_path().to_str().unwrap())
+//!           }
+//!       }
+//!   }
+//! }
+//! ```
 
 use std::fs::File;
 use std::io::{BufReader, Cursor, Error, Read, Result, Seek, SeekFrom};
