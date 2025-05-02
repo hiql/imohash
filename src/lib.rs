@@ -2,6 +2,8 @@
 //!
 //! It is based atop murmurhash3 and uses file size and sample data to construct the hash.
 
+pub mod sans_io;
+
 use std::fs::File;
 use std::io::{BufReader, Cursor, Error, Read, Result, Seek, SeekFrom};
 use std::path::Path;
